@@ -1,11 +1,12 @@
 "use server"
 import { CreateGroupSchema } from "@/components/forms/create-group/schema"
 import { client } from "@/lib/prisma"
+import { auth } from '@clerk/nextjs/server';
 import axios from "axios"
 import { revalidatePath } from "next/cache"
 import { v4 as uuidv4 } from "uuid"
 import { z } from "zod"
-import { onAuthenticatedUser } from "./auth"
+
 
 export const onGetAffiliateInfo = async (id: string) => {
   try {
@@ -47,7 +48,7 @@ export const onCreateNewGroup = async (
   try {
     const created = await client.user.update({
       where: {
-        id: userId,
+        id: userId!,
       },
       data: {
         group: {
@@ -114,7 +115,7 @@ export const onCreateNewGroup = async (
 
 export const onGetGroupInfo = async (groupid: string) => {
   try {
-    const user = await onAuthenticatedUser()
+      const { userId } = await auth();
     const group = await client.group.findUnique({
       where: {
         id: groupid,
@@ -125,7 +126,7 @@ export const onGetGroupInfo = async (groupid: string) => {
       return {
         status: 200,
         group,
-        groupOwner: user.id === group.userId ? true : false,
+        groupOwner:  userId  === group.userId ? true : false,
       }
 
     return { status: 404 }
@@ -238,12 +239,12 @@ export const onGetGroupSubscriptions = async (groupid: string) => {
 
 export const onGetAllGroupMembers = async (groupid: string) => {
   try {
-    const user = await onAuthenticatedUser()
+    const { userId } = await auth();
     const members = await client.members.findMany({
       where: {
         groupId: groupid,
         NOT: {
-          userId: user.id,
+          userId: userId,
         },
       },
       include: {
@@ -412,7 +413,7 @@ export const onGetPaginatedPosts = async (
   paginate: number,
 ) => {
   try {
-    const user = await onAuthenticatedUser()
+    const { userId } = await auth();
     const posts = await client.post.findMany({
       where: {
         channelId: identifier,
@@ -443,7 +444,7 @@ export const onGetPaginatedPosts = async (
         },
         likes: {
           where: {
-            userId: user.id!,
+            userId: userId!,
           },
           select: {
             userId: true,
@@ -501,7 +502,7 @@ export const onUpdateGroupGallery = async (
 
 export const onJoinGroup = async (groupid: string) => {
   try {
-    const user = await onAuthenticatedUser()
+    const { userId } = await auth();
     const member = await client.group.update({
       where: {
         id: groupid,
@@ -509,7 +510,7 @@ export const onJoinGroup = async (groupid: string) => {
       data: {
         member: {
           create: {
-            userId: user.id,
+            userId: userId,
           },
         },
       },
@@ -578,14 +579,14 @@ export const onGetUserFromMembership = async (membershipid: string) => {
 
 export const onGetAllUserMessages = async (recieverId: string) => {
   try {
-    const sender = await onAuthenticatedUser()
+    const { userId } = await auth();
     const messages = await client.message.findMany({
       where: {
         senderid: {
-          in: [sender.id!, recieverId],
+          in: [userId!, recieverId],
         },
         recieverId: {
-          in: [sender.id!, recieverId],
+          in: [userId!, recieverId],
         },
       },
     })
@@ -606,10 +607,10 @@ export const onSendMessage = async (
   message: string,
 ) => {
   try {
-    const user = await onAuthenticatedUser()
+    const { userId } = await auth();
     const newMessage = await client.user.update({
       where: {
-        id: user.id,
+        id: userId!,
       },
       data: {
         message: {
@@ -632,7 +633,7 @@ export const onSendMessage = async (
 
 export const onGetPostInfo = async (postid: string) => {
   try {
-    const user = await onAuthenticatedUser()
+    const { userId } = await auth();
     const post = await client.post.findUnique({
       where: {
         id: postid,
@@ -658,7 +659,7 @@ export const onGetPostInfo = async (postid: string) => {
         },
         likes: {
           where: {
-            userId: user.id!,
+            userId: userId!,
           },
           select: {
             userId: true,

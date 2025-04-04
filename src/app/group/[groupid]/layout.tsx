@@ -1,4 +1,5 @@
-import { onAuthenticatedUser } from "@/actions/auth"
+// import { onAuthenticatedUser } from "@/actions/auth"
+import { auth } from '@clerk/nextjs/server';
 import {
   onGetAllGroupMembers,
   onGetGroupChannels,
@@ -26,8 +27,8 @@ type Props = {
 const GroupLayout = async ({ children, params }: Props) => {
   const query = new QueryClient()
 
-  const user = await onAuthenticatedUser()
-  if (!user.id) redirect("/sign-in")
+  const { userId } = await auth()
+  if (!userId) redirect("/sign-in")
 
   //group info
   await query.prefetchQuery({
@@ -38,7 +39,7 @@ const GroupLayout = async ({ children, params }: Props) => {
   //user groups
   await query.prefetchQuery({
     queryKey: ["user-groups"],
-    queryFn: () => onGetUserGroups(user.id as string),
+    queryFn: () => onGetUserGroups(userId as unknown as string),
   })
 
   //channels
@@ -62,9 +63,9 @@ const GroupLayout = async ({ children, params }: Props) => {
   return (
     <HydrationBoundary state={dehydrate(query)}>
       <div className="flex h-screen md:pt-5">
-        <SideBar groupid={params.groupid} userid={user.id} />
+        <SideBar groupid={params.groupid} userid={userId} />
         <div className="md:ml-[300px] flex flex-col flex-1 bg-[#101011] md:rounded-tl-xl overflow-y-auto border-l-[1px] border-t-[1px] border-[#28282D]">
-          <Navbar groupid={params.groupid} userid={user.id} />
+          <Navbar groupid={params.groupid} userid={userId} />
           {children}
           <MobileNav groupid={params.groupid} />
         </div>

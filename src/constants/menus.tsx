@@ -39,14 +39,14 @@ export const LANDING_PAGE_MENU: MenuProps[] = [
   },
   {
     id: 1,
-    label: "Pricing",
+    label: "Courses",
     icon: <CreditCard />,
     path: "#pricing",
     section: true,
   },
   {
     id: 1,
-    label: "Explore",
+    label: "Affiliates",
     icon: <Explore />,
     path: "/explore",
   },

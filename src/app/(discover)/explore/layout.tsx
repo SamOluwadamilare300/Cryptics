@@ -1,15 +1,15 @@
 import { onAuthenticatedUser } from "@/actions/auth"
 import BackdropGradient from "@/components/global/backdrop-gradient"
 import GradientText from "@/components/global/gradient-text"
-
+import { auth } from '@clerk/nextjs/server';
 import { GroupListSlider } from "@/components/global/group-list-slider"
 import Search from "@/components/global/search"
-
 import Link from "next/link"
 import React from "react"
 
 const ExploreLayout = async ({ children }: { children: React.ReactNode }) => {
-  const user = await onAuthenticatedUser()
+  const { userId } = await auth();
+  if (!userId) return null;
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex flex-col items-center mt-36 px-10">
@@ -22,7 +22,7 @@ const ExploreLayout = async ({ children }: { children: React.ReactNode }) => {
         <p className="text-themeTextGray leading-none pt-2">
           or{" "}
           <Link
-            href={user.status === 200 ? `/group/create` : "/sign-in"}
+            href={ userId ? `/group/create` : "/sign-in"}
             className="underline"
           >
             create your own

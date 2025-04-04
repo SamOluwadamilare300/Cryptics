@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { GROUPLE_CONSTANTS } from "@/constants"
 import { useAuthSignUp } from "@/hooks/authentication"
 import dynamic from "next/dynamic"
+import { useEffect, useRef, useState } from "react"
+import HCaptcha from "@hcaptcha/react-hcaptcha"
+import { toast } from "sonner"
 
 type Props = {}
 
@@ -29,6 +32,36 @@ const SignUpForm = (props: Props) => {
     getValues,
   } = useAuthSignUp()
 
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false)
+  const captchaRef = useRef<HCaptcha>(null)
+
+  const handleGenerateCode = async () => {
+    if (!isCaptchaVerified) {
+      return toast.error("Please complete the CAPTCHA verification")
+    }
+
+    try {
+      await onGenerateCode(getValues("email"), getValues("password"))
+      // Reset CAPTCHA after successful generation
+      captchaRef.current?.resetCaptcha()
+      setIsCaptchaVerified(false)
+    } catch (error) {
+      captchaRef.current?.resetCaptcha()
+      setIsCaptchaVerified(false)
+    }
+  }
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token)
+    setIsCaptchaVerified(true)
+  }
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null)
+    setIsCaptchaVerified(false)
+  }
+
   return (
     <form
       onSubmit={onInitiateUserRegistration}
@@ -39,14 +72,26 @@ const SignUpForm = (props: Props) => {
           <OtpInput otp={code} setOtp={setCode} />
         </div>
       ) : (
-        GROUPLE_CONSTANTS.signUpForm.map((field) => (
-          <FormGenerator
-            {...field}
-            key={field.id}
-            register={register}
-            errors={errors}
-          />
-        ))
+        <>
+          {GROUPLE_CONSTANTS.signUpForm.map((field) => (
+            <FormGenerator
+              {...field}
+              key={field.id}
+              register={register}
+              errors={errors}
+            />
+          ))}
+          
+          {/* CAPTCHA Component */}
+          <div className="my-4 flex justify-center">
+            <HCaptcha
+              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+              onVerify={handleCaptchaVerify}
+              onExpire={handleCaptchaExpire}
+              ref={captchaRef}
+            />
+          </div>
+        </>
       )}
 
       {verifying ? (
@@ -57,11 +102,10 @@ const SignUpForm = (props: Props) => {
         <Button
           type="button"
           className="rounded-2xl"
-          onClick={() =>
-            onGenerateCode(getValues("email"), getValues("password"))
-          }
+          onClick={handleGenerateCode}
+          disabled={!isCaptchaVerified || creating}
         >
-          <Loader loading={false}>Generate Code</Loader>
+          <Loader loading={creating}>Generate Code</Loader>
         </Button>
       )}
     </form>
