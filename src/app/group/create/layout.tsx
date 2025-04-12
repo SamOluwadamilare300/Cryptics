@@ -9,18 +9,22 @@ type Props = {
 
 const CreateGroupLayout = ({ children }: Props) => {
   return (
-    <div className="container h-screen grid grid-cols-1 lg:grid-cols-2 content-center">
-      <div className="flex items-center">
+    <> 
+    <div className="">
+    <h5 className="text-2xl font-bold ml-4 mt-9 text-themeTextWhite">Cryptics.</h5>
+    </div>
+    <div className="container mt-24 h-screen grid grid-cols-1 lg:grid-cols-2 content-center">
+      <div className="flex mt-32 items-center">
         <BackdropGradient className="w-8/12 h-2/6 opacity-50">
-          <h5 className="text-2xl font-bold text-themeTextWhite">Grouple.</h5>
-          <GradientText element="H2" className="text-4xl font-semibold py-1">
-            Create Your Group
+          {/* <h5 className="text-2xl font-bold text-themeTextWhite">Cryptics.</h5> */}
+          <GradientText element="H2" className="text-4xl italic [text-shadow:0_2px_4px_rgba(0,0,0,0.3)] font-semibold py-1">
+           Start a Campus, Spark a Learning revolution.
           </GradientText>
           <p className="text-themeTextGray">
-            Free for 14 days, then $99/month. Cancel anytime.All features.
-            Unlimited everything. No hidden fees.
+            Network with people from around the world, join campuses, create your own,
+            watch courses and become the best version of yourself.
           </p>
-          <div className="flex flex-col gap-3 mt-16 pl-5">
+          <div className="flex flex-col gap-3 mt-14 pl-5">
             {GROUPLE_CONSTANTS.createGroupPlaceholder.map((placeholder) => (
               <div className="flex gap-3" key={placeholder.id}>
                 {placeholder.icon}
@@ -41,6 +45,8 @@ const CreateGroupLayout = ({ children }: Props) => {
         </BackdropGradient>
       </div>
     </div>
+    <div className="mb-60"></div>
+    </>
   )
 }
 

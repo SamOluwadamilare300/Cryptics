@@ -15,4 +15,4 @@ const CreateGroup = ({ userId, affiliate, stripeId }: Props) => {
   )
 }
 
-export default CreateGroup;
+export default CreateGroup

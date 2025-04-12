@@ -62,7 +62,7 @@ const PaymentForm = ({ affiliate, userId, stripeId }: Props) => {
             errors={errors}
             inputType="input"
             type="text"
-            placeholder="Group Name"
+            placeholder="Campus Name"
           />
         </div>
         <div className="px-7 my-3">
@@ -86,15 +86,21 @@ const PaymentForm = ({ affiliate, userId, stripeId }: Props) => {
             Cancel anytime with 1-click. By clicking below, you accept
             our terms.
           </p>
-          <Link className="text-sm text-themeTextGray" href={"/explore"}>
-            Skip for now
-          </Link>
+        
           <Button
             variant="outline"
             type="submit"
             className="bg-themeBlack border-themeGray rounded-xl"
           >
             <Loader loading={isPending}>Get Started</Loader>
+          </Button>
+               <span className="">OR</span>
+          <Button
+           className="bg-themeBlack border-themeGray rounded-xl"
+          >  
+          <Link className="text-sm text-themeTextGray" href={"/explore"}>
+            Skip for now
+          </Link>
           </Button>
         </div>
       </form>

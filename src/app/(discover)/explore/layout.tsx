@@ -17,7 +17,7 @@ const ExploreLayout = async ({ children }: { children: React.ReactNode }) => {
           className="text-[90px] font-semibold leading-none"
           element="H2"
         >
-          Explore Groups
+          Explore Campuses
         </GradientText>
         <p className="text-themeTextGray leading-none pt-2">
           or{" "}

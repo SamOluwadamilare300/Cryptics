@@ -31,7 +31,7 @@ export const Navbar = async ({ groupid, userid }: NavbarProps) => {
           className="bg-themeBlack rounded-2xl flex gap-2 border-themeGray hover:bg-themeGray"
         >
           <CheckBadge />
-          Create Group
+          Create Campus
         </Button>
       </Link>
       <UserWidget userid={userid} image={user?.imageUrl!} groupid={groupid} />

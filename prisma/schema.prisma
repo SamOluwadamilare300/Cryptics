@@ -60,6 +60,15 @@ model Group {
   affiliate       Affiliate?
   domain          String?
   subscription    Subscription[]
+  paymentReference String? @unique
+  status           GroupStatus @default(PENDING)
+}
+
+
+enum GroupStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
 }
 
 model Members {

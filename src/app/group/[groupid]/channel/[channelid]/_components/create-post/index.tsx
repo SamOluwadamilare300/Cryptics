@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription } from "@/components/ui/card"
 import { useChannelPage } from "@/hooks/channels"
 import { PostCard } from "../post-feed/post-card"
 
-type Props = { userImage: string; channelid: string; username: string }
+type Props = { userImage: string; channelid: string; username: string; userId: string }
 
 const CreateNewPost = ({ channelid, userImage, username }: Props) => {
   const { data, mutation } = useChannelPage(channelid)

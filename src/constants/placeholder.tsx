@@ -8,6 +8,8 @@ import {
   WhiteLabel,
 } from "@/icons"
 
+import { MdLiveTv } from "react-icons/md";
+
 export type CreateGroupPlaceholderProps = {
   id: string
   label: string
@@ -17,37 +19,42 @@ export type CreateGroupPlaceholderProps = {
 export const CREATE_GROUP_PLACEHOLDER: CreateGroupPlaceholderProps[] = [
   {
     id: "0",
-    label: "Highly engaging",
+    label: "Engage Affiliates with Interactive Campaigns",
     icon: <MegaPhone />,
   },
   {
     id: "1",
-    label: "Easy to setup",
+    label: "Simple & Quick Setup Process",
     icon: <Heart />,
   },
   {
     id: "2",
-    label: "Group chat and posts",
+    label: "Real-time Group Chats & Posts",
     icon: <Chat />,
   },
   {
     id: "3",
-    label: "Students can create teams within Groups",
+    label: "Enable Students to Create Their Own Teams",
     icon: <Grid />,
   },
   {
     id: "4",
-    label: "Gamification",
+    label: "Incorporate Gamification Features",
     icon: <Document />,
   },
   {
     id: "5",
-    label: "Host unlimited courses",
+    label: "Host Unlimited Courses & Modules",
     icon: <Courses />,
   },
   {
     id: "6",
-    label: "White-labeling options",
+    label: "Full White-labeling Customization",
     icon: <WhiteLabel />,
+  },
+  {
+    id: "7",
+    label: "Host Live Sessions & Coaching Across All Campuses",
+    icon: <MdLiveTv />,
   },
 ]

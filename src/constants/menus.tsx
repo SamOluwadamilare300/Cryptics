@@ -39,29 +39,29 @@ export const LANDING_PAGE_MENU: MenuProps[] = [
   },
   {
     id: 1,
-    label: "Courses",
+    label: "Campuses",
     icon: <CreditCard />,
-    path: "#pricing",
+    path: "#campuses",
     section: true,
   },
   {
     id: 1,
     label: "Affiliates",
     icon: <Explore />,
-    path: "/explore",
+    path: "/affiliate-stories",
   },
 ]
 export const GROUP_PAGE_MENU: MenuProps[] = [
   {
     id: 0,
-    label: "Group",
+    label: "Campus",
     icon: <Home />,
     path: "/",
     section: true,
   },
   {
     id: 1,
-    label: "Courses",
+    label: "Department",
     icon: <Courses />,
     path: "#pricing",
     section: true,
