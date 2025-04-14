@@ -21,22 +21,26 @@ const GroupSideWidget = ({ groupid, light, userid }: Props) => {
         light ? "border-themeGray bg-[#1A1A1D]" : "bg-themeBlack",
       )}
     >
-      <img
+      {/* <img
         src={`https://ucarecdn.com/${group.thumbnail}/`}
         alt="thumbnail"
         className="w-full aspect-video"
-      />
+      /> */}
       <div className="flex flex-col p-5 gap-y-2">
-        <h2 className="font-bold text-lg">{group.name}</h2>
-        <p className="text-sm text-themeTextGray">
-          {group.description && truncateString(group.description)}
-        </p>
+        {group && (
+          <>
+            <h2 className="font-bold text-lg">{group.name}</h2>
+            <p className="text-sm text-themeTextGray">
+              {group.description && truncateString(group.description)}
+            </p>
+          </>
+        )}
       </div>
       <Separator orientation="horizontal" className="bg-themeGray" />
       {groupid && (
         <JoinButton
           groupid={groupid}
-          owner={group.userId === userid ? true : false}
+          owner={group?.userId === userid ? true : false}
         />
       )}
     </Card>

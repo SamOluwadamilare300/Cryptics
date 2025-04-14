@@ -340,7 +340,7 @@ export const useExploreSlider = (query: string, paginate: number) => {
 }
 
 export const useGroupInfo = () => {
-  const { data } = useQuery({
+  const { data } = useQuery<{ group: GroupStateProps; status: number }>({
     queryKey: ["about-group-info"],
   })
 
@@ -348,8 +348,10 @@ export const useGroupInfo = () => {
 
   if (!data) router.push("/explore")
 
-  const { group, status } = data as { status: number; group: GroupStateProps }
-
+  // const { group, status } = data as { status: number; group: GroupStateProps }
+  const group = data?.group
+  const status = data?.status
+  
   if (status !== 200) router.push("/explore")
 
   return {

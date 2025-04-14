@@ -1,6 +1,5 @@
-
+'use client'
 import { onGetUserGroups } from "@/actions/groups"
-import { auth } from '@clerk/nextjs/server';
 import GlassSheet from "@/components/global/glass-sheet"
 import { UserWidget } from "@/components/global/user-widget"
 import { Button } from "@/components/ui/button"
@@ -8,9 +7,11 @@ import { CheckBadge, Logout } from "@/icons"
 import { MenuIcon } from "lucide-react"
 import Link from "next/link"
 import { GroupDropDown } from "./group-dropdown"
+// import { auth } from "@clerk/nextjs/server"
+import { getServerAuthUser } from "@/lib/getServerAuthUser"
 
 export const Navbar = async () => {
-  const { userId } = await auth();
+  const userId = await getServerAuthUser()
   const groups = await onGetUserGroups(userId!)
 
 
@@ -44,7 +45,7 @@ export const Navbar = async () => {
           </Button>
         </Link>
         {userId ? (
-          <UserWidget image={null} />
+          <UserWidget image="" />
           // <UserWidget image={userId.image!} />
         ) : (
           <Link href="/sign-in">

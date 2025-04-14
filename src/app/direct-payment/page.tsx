@@ -20,7 +20,7 @@ const formSchema = z.object({
   customerEmail: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+  amount: z.number().positive({
     message: "Amount must be a positive number.",
   }),
   paymentMethod: z.enum(["CARD", "ACCOUNT_TRANSFER"], {
@@ -34,12 +34,14 @@ export default function DirectPaymentPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
 
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       customerName: "",
       customerEmail: "",
-      amount: "",
+      amount: 1000,
       paymentMethod: "ACCOUNT_TRANSFER",
     },
   })
@@ -58,7 +60,7 @@ export default function DirectPaymentPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: Number.parseFloat(values.amount),
+          amount: values.amount,
           customerName: values.customerName,
           customerEmail: values.customerEmail,
           paymentMethods: [values.paymentMethod],

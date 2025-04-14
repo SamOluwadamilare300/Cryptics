@@ -1,33 +1,33 @@
-import { auth } from "@clerk/nextjs/server";
+
 import { onGetChannelInfo } from "@/actions/channels";
 import { onGetGroupInfo } from "@/actions/groups";
-
 import { LeaderBoardCard } from "@/app/group/_components/leaderboard";
 import GroupSideWidget from "@/components/global/group-side-widget";
-import {
-  HydrationBoundary,
-  QueryClient,
-  dehydrate,
-} from "@tanstack/react-query";
+import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 import Menu from "../../_components/group-navbar";
 import CreateNewPost from "./_components/create-post";
 import { PostFeed } from "./_components/post-feed";
+import { getServerAuthUser } from "@/lib/getServerAuthUser";
+import { auth } from "@clerk/nextjs/server"
 
 type Props = {
-  params:Promise< { channelid: string; groupid: string }>;
+  params: Promise<{ channelid: string; groupid: string }>;
 };
 
 const GroupChannelPage = async ({ params }: Props) => {
   try {
-    const { channelid, groupid } = await  params;
+    // Await params to extract route parameters
+    const { channelid, groupid } = await params;
+
     // Validate params
     if (!channelid || !groupid) {
       throw new Error("Missing required route parameters.");
     }
 
-
     // Fetch user authentication server-side
-    const { userId } = await auth();
+
+    // const userId = await getServerAuthUser()
+    const { userId } = await auth()
     if (!userId) {
       return {
         redirect: {
@@ -42,12 +42,12 @@ const GroupChannelPage = async ({ params }: Props) => {
 
     // Prefetch channel and group data
     await client.prefetchQuery({
-      queryKey: ["channel-info"],
+      queryKey: ["channel-info", channelid], // Unique query key
       queryFn: () => onGetChannelInfo(channelid),
     });
 
     await client.prefetchQuery({
-      queryKey: ["about-group-info"],
+      queryKey: ["about-group-info", groupid], // Unique query key
       queryFn: () => onGetGroupInfo(groupid),
     });
 
@@ -63,8 +63,8 @@ const GroupChannelPage = async ({ params }: Props) => {
             <CreateNewPost
               userId={userId}
               channelid={channelid}
-              userImage={""}
-              username={""}
+              userImage={""} // Placeholder for user image
+              username={""} // Placeholder for username
             />
             <PostFeed channelid={channelid} userid={userId} />
           </div>

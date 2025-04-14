@@ -1,3 +1,4 @@
+
 import {
   onGetAllGroupMembers,
   onGetGroupChannels,
@@ -7,14 +8,11 @@ import {
 } from "@/actions/groups";
 import SideBar from "@/components/global/sidebar";
 import { auth } from "@clerk/nextjs/server";
-import {
-  HydrationBoundary,
-  QueryClient,
-  dehydrate,
-} from "@tanstack/react-query";
+import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import MobileNav from "../_components/mobile-nav";
 import { Navbar } from "../_components/navbar";
+import { getServerAuthUser } from "@/lib/getServerAuthUser";
 
 type Props = {
   children: React.ReactNode;
@@ -23,15 +21,17 @@ type Props = {
 
 const GroupLayout = async ({ children, params }: Props) => {
   try {
+    // Await params to extract route parameters
     const { groupid } = await params;
-    
-    // Ensure params are valid
+
+    // Validate params
     if (!groupid) {
       throw new Error("Group ID is missing from route parameters.");
     }
 
-    // Ensure Clerk Authentication
+    // Fetch user authentication server-side
     const { userId } = await auth();
+    // const userId = await getServerAuthUser()
     if (!userId) {
       redirect("/sign-in"); // Redirect if not authenticated
     }
@@ -39,29 +39,29 @@ const GroupLayout = async ({ children, params }: Props) => {
     // Initialize the Query Client
     const queryClient = new QueryClient();
 
-    // Fetch all required data
+    // Prefetch multiple data sets
     await queryClient.prefetchQuery({
-      queryKey: ["group-info"],
+      queryKey: ["group-info", groupid], // Unique query key
       queryFn: () => onGetGroupInfo(groupid),
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ["user-groups"],
+      queryKey: ["user-groups", userId], // Unique query key
       queryFn: () => onGetUserGroups(userId),
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ["group-channels"],
+      queryKey: ["group-channels", groupid], // Unique query key
       queryFn: () => onGetGroupChannels(groupid),
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ["group-subscriptions"],
+      queryKey: ["group-subscriptions", groupid], // Unique query key
       queryFn: () => onGetGroupSubscriptions(groupid),
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ["member-chats"],
+      queryKey: ["member-chats", groupid], // Unique query key
       queryFn: () => onGetAllGroupMembers(groupid),
     });
 

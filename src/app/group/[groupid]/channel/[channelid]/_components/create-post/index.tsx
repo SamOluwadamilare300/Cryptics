@@ -11,7 +11,13 @@ type Props = { userImage: string; channelid: string; username: string; userId: s
 
 const CreateNewPost = ({ channelid, userImage, username }: Props) => {
   const { data, mutation } = useChannelPage(channelid)
+  // const { name } = data as { name: string }
+  if (!data) {
+    return null
+  }
+  
   const { name } = data as { name: string }
+  
 
   return (
     <>

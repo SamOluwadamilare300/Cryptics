@@ -1,10 +1,12 @@
+// 'use client'
 import GlassSheet from "@/components/global/glass-sheet"
 import Search from "@/components/global/search"
 import SideBar from "@/components/global/sidebar"
 import { UserWidget } from "@/components/global/user-widget"
 import { Button } from "@/components/ui/button"
 import { CheckBadge } from "@/icons"
-import { currentUser } from "@clerk/nextjs/server"
+import { getServerAuthUser } from "@/lib/getServerAuthUser"
+
 import { Menu } from "lucide-react"
 import Link from "next/link"
 
@@ -14,11 +16,11 @@ type NavbarProps = {
 }
 
 export const Navbar = async ({ groupid, userid }: NavbarProps) => {
-  const user = await currentUser()
+  const userId = await getServerAuthUser()
   return (
     <div className="bg-[#1A1A1D] py-2 px-3 md:px-7 md:py-5 flex gap-5 justify-between md:justify-end items-center">
       <GlassSheet trigger={<Menu className="md:hidden cursor-pointer" />}>
-        <SideBar groupid={groupid} userid={userid} mobile />
+        <SideBar groupid={groupid} userid={userId ?? ""} mobile />
       </GlassSheet>
       <Search
         searchType="POSTS"
@@ -34,7 +36,7 @@ export const Navbar = async ({ groupid, userid }: NavbarProps) => {
           Create Campus
         </Button>
       </Link>
-      <UserWidget userid={userid} image={user?.imageUrl!} groupid={groupid} />
+      {/* <UserWidget userid={userid} image={userId?.imageUrl!} groupid={groupid} /> */}
     </div>
   )
 }

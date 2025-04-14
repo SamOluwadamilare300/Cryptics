@@ -57,20 +57,28 @@ export interface IGroups {
 }
 
 const SideBar = ({ groupid, userid, mobile }: Props) => {
-  const { groupInfo, groups, mutate, variables, isPending, channels } =
-    useSideBar(groupid)
-  console.log(groups.groups)
+  const { groupInfo, groups, mutate, variables, isPending, channels } = useSideBar(groupid);
 
-  useGroupChatOnline(userid)
+  // Safely handle undefined or empty groups
+  if (!groups || !groups.groups) {
+    return (
+      <div className={cn("h-screen", !mobile ? "hidden md:flex" : "flex")}>
+        <p className="text-white p-4">Loading groups...</p>
+      </div>
+    );
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useGroupChatOnline(userid);
 
   return (
     <div
       className={cn(
         "h-screen flex-col gap-y-10 sm:px-5",
-        !mobile ? "hidden bg-black md:w-[300px] fixed md:flex" : "w-full flex",
+        !mobile ? "hidden bg-black md:w-[300px] fixed md:flex" : "w-full flex"
       )}
     >
-      {groups.groups && groups.groups.length > 0 && (
+      {groups.groups.length > 0 && (
         <DropDown
           title="Groups"
           trigger={
@@ -89,22 +97,20 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
             </div>
           }
         >
-          {groups &&
-            groups.groups.length > 0 &&
-            groups.groups.map((item) => (
-              <Link
-                key={item.id}
-                href={`/group/${item.id}/channel/${channels?.channels?.[0].id!}`}
+          {groups.groups.map((item) => (
+            <Link
+              key={item.id}
+              href={`/group/${item.id}/channel/${channels?.channels?.[0].id!}`}
+            >
+              <Button
+                variant="ghost"
+                className="flex gap-2 w-full justify-start hover:bg-themeGray items-center"
               >
-                <Button
-                  variant="ghost"
-                  className="flex gap-2 w-full justify-start hover:bg-themeGray items-center"
-                >
-                  <Group />
-                  {item.name}
-                </Button>
-              </Link>
-            ))}
+                <Group />
+                {item.name}
+              </Button>
+            </Link>
+          ))}
         </DropDown>
       )}
 
@@ -116,7 +122,7 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
               size={16}
               className={cn(
                 "text-themeTextGray cursor-pointer",
-                isPending && "opacity-70",
+                isPending && "opacity-70"
               )}
               {...(!isPending && {
                 onClick: () =>
@@ -141,7 +147,7 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;

@@ -72,9 +72,10 @@ export default function PaymentStatusPage() {
          
           console.log("Redirecting to:", `/group/${groupData.group.id}/channel/${groupData.group.channels[0].id}`);
           // Redirect to the group channel page
-          router.push(
-            `/group/${groupData.group.id}/channel/${groupData.group.channels[0].id}`
-          )
+          // router.push(
+          //   `/group/${groupData.group.id}/channel/${groupData.group.channels[0].id}`
+          // )
+          window.location.href = `/group/${groupData.group.id}/channel/${groupData.group.channels[0].id}`;
         } else {
           setStatus("failed")
           setError(`Payment ${response.paymentStatus.toLowerCase()}`)
