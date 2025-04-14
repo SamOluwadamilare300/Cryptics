@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import { onTransferCommission } from "@/actions/payments"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -9,26 +8,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  verifyPayment,
-  type PaymentVerificationResponse,
-} from "@/lib/payment-service"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+} from "@/components/ui/select";
+import { initializeTransaction } from "@/lib/payment-service"; // Initialize Monnify transactions
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export const formSchema = z.object({
   name: z.string().min(3, {
@@ -40,33 +36,26 @@ export const formSchema = z.object({
   customerEmail: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  paymentMethod: z.enum(["CARD", "ACCOUNT_TRANSFER", "CRYPTO"], {
+  paymentMethod: z.enum(["CARD", "ACCOUNT_TRANSFER"], {
     required_error: "Please select a payment method.",
   }),
-})
+});
 
 export type MonnifyPaymentFormProps = {
-  userId: string
-  affiliate: boolean
-  monnifyId?: string
-}
+  userId: string;
+  affiliate: boolean;
+  monnifyId?: string;
+};
 
 export default function MonnifyPaymentForm({
   userId,
   affiliate,
   monnifyId,
 }: MonnifyPaymentFormProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [status, setStatus] = useState<"loading" | "success" | "failed">(
-    "loading",
-  )
-  const [paymentDetails, setPaymentDetails] =
-    useState<PaymentVerificationResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const pollingRef = useRef<NodeJS.Timeout | null>(null)
-  const isMountedRef = useRef(true)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,82 +65,62 @@ export default function MonnifyPaymentForm({
       customerEmail: "",
       paymentMethod: "ACCOUNT_TRANSFER",
     },
-  })
+  });
 
   useEffect(() => {
     return () => {
-      isMountedRef.current = false
-      if (pollingRef.current) {
-        clearTimeout(pollingRef.current)
-      }
-    }
-  }, [])
-
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const onCreateGroup = async (values: z.infer<typeof formSchema>) => {
-    if (isLoading) return
+    if (isLoading) return;
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const paymentResponse = await fetch("/api/direct-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: 1000,
-          customerName: values.name,
-          customerEmail: values.customerEmail,
-          paymentMethods: [values.paymentMethod],
-          userId,
-        }),
-      })
+      // Initialize Monnify payment
+      const paymentResponse = await initializeTransaction({
+        amount: 1000, // Example amount
+        customerName: values.name,
+        customerEmail: values.customerEmail,
+        paymentMethods: [values.paymentMethod],
+      });
 
-      const paymentData = await paymentResponse.json()
-
-      if (!paymentResponse.ok) {
-        throw new Error(paymentData.message || "Failed to initialize payment")
+      if (!paymentResponse || !paymentResponse.checkoutUrl) {
+        throw new Error("Failed to initialize payment: No checkout URL returned.");
       }
 
-      if (paymentData.checkoutUrl) {
-        // Store payment reference before redirecting
-        localStorage.setItem("monnifyPaymentRef", paymentData.paymentReference)
+      // Store payment reference and form values in localStorage
+      localStorage.setItem("monnifyPaymentRef", paymentResponse.paymentReference);
+      localStorage.setItem(
+        "monnifyFormValues",
+        JSON.stringify({
+          name: values.name,
+          category: values.category,
+        })
+      );
+      localStorage.setItem("userId", userId); // Store the userId
 
-        // Store form values in localStorage
-        localStorage.setItem(
-          "monnifyFormValues",
-          JSON.stringify({
-            name: values.name,
-            category: values.category,
-          }),
-        )
-
-        // Redirect to Monnify checkout
-        window.location.href = paymentData.checkoutUrl
-      } else {
-        throw new Error("No checkout URL returned from the API")
-      }
+      // Redirect to Monnify checkout
+      window.location.href = paymentResponse.checkoutUrl;
     } catch (err) {
       if (isMountedRef.current) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred",
-        )
-        setIsLoading(false)
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setIsLoading(false);
       }
+      console.error("Error initializing payment:", err);
     }
-  }
+  };
 
   return (
     <div className="px-7 flex flex-col gap-4">
-      {/* <h5 className="font-bold text-base text-themeTextWhite">Create Your Campus</h5>
-      <p className="text-themeTextGray leading-tight">
-        Get started by creating your campus community
-      </p> */}
-
       {error && <div className="text-sm text-red-500 mt-2 italic">{error}</div>}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onCreateGroup)} className="space-y-6">
+          {/* Campus Name */}
           <FormField
             control={form.control}
             name="name"
@@ -170,6 +139,7 @@ export default function MonnifyPaymentForm({
             )}
           />
 
+          {/* Category */}
           <FormField
             control={form.control}
             name="category"
@@ -181,11 +151,11 @@ export default function MonnifyPaymentForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="placeholder:text-gray-600 text-gray-200">
+                    <SelectTrigger className="placeholder:text-gray-600">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="backdrop-blur-md bg-white/80 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-700">
+                  <SelectContent>
                     <SelectItem value="education">Education</SelectItem>
                     <SelectItem value="business">Business</SelectItem>
                     <SelectItem value="technology">Technology</SelectItem>
@@ -199,6 +169,7 @@ export default function MonnifyPaymentForm({
             )}
           />
 
+          {/* Email */}
           <FormField
             control={form.control}
             name="customerEmail"
@@ -217,6 +188,7 @@ export default function MonnifyPaymentForm({
             )}
           />
 
+          {/* Payment Method */}
           <FormField
             control={form.control}
             name="paymentMethod"
@@ -228,12 +200,12 @@ export default function MonnifyPaymentForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="placeholder:text-gray-400 text-gray-200">
+                    <SelectTrigger className="placeholder:text-gray-400">
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="backdrop-blur-md bg-white/80 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-700">
-                    <SelectItem value="CRYPTO">
+                  <SelectContent>
+                  <SelectItem value="CRYPTO">
                       💰 Wallet{" "}
                       <span className="italic mr-2 text-sm text-gray-600">
                         Not available
@@ -250,15 +222,10 @@ export default function MonnifyPaymentForm({
             )}
           />
 
-          <div className="pt-4">
-            <p className="text-sm text-themeTextGray">
-              Cancel anytime. By clicking below, you accept our terms.
-            </p>
-          </div>
-
+          {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-themeBlack border-themeGray rounded-xl"
+            className="w-full"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -270,19 +237,18 @@ export default function MonnifyPaymentForm({
               "Get Started"
             )}
           </Button>
-
           <span className="block text-center">OR</span>
 
-          <Button
-            className="w-full bg-themeBlack border-themeGray rounded-xl"
-            asChild
-          >
-            <a href="/explore" className="text-sm text-themeTextGray">
-              Skip for now
-            </a>
-          </Button>
+      <Button
+      className="w-full bg-themeBlack border-themeGray rounded-xl"
+     asChild
+>
+      <a href="/explore" className="text-sm text-themeTextGray">
+    Skip for now
+     </a>
+     </Button>
         </form>
       </Form>
     </div>
-  )
+  );
 }
